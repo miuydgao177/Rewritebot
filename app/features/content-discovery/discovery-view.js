@@ -14,7 +14,14 @@ export function renderSearchResults(container, notes, selectedNoteIds) {
     return;
   }
 
-  container.innerHTML = notes.map((note) => createNoteCard(note, selectedNoteIds)).join("");
+  const columns = [[], [], []];
+  notes.forEach((note, index) => {
+    columns[index % columns.length].push(createNoteCard(note, selectedNoteIds));
+  });
+
+  container.innerHTML = columns
+    .map((column) => `<div class="masonry-column">${column.join("")}</div>`)
+    .join("");
 }
 
 function createNoteCard(note, selectedNoteIds) {

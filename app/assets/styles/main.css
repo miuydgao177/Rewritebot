@@ -62,7 +62,7 @@ button {
 .workspace {
   display: grid;
   align-items: start;
-  grid-template-columns: 304px minmax(420px, 1fr) 392px;
+  grid-template-columns: 304px minmax(640px, 1fr);
   gap: 14px;
   min-height: 100vh;
   width: min(1600px, calc(100vw - 24px));
@@ -342,23 +342,27 @@ textarea:focus {
 }
 
 .content-grid {
-  display: block;
-  column-count: 3;
-  column-gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
   padding: 16px 18px 20px;
 }
 
+.masonry-column {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .content-card {
-  display: inline-grid;
+  display: grid;
   grid-template-columns: 1fr;
   width: 100%;
-  margin: 0 0 12px;
   border: 1px solid var(--line);
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.72);
   overflow: hidden;
-  break-inside: avoid;
-  page-break-inside: avoid;
   box-shadow: 0 12px 28px rgba(30, 36, 40, 0.06);
   transition:
     transform 160ms ease,
@@ -506,6 +510,7 @@ textarea:focus {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  grid-column: 1 / -1;
 }
 
 .output-head {
@@ -560,7 +565,7 @@ textarea:focus {
   }
 
   .content-grid {
-    column-count: 3;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .output-panel {
@@ -582,7 +587,11 @@ textarea:focus {
 
   .insight-strip,
   .content-grid {
-    column-count: 1;
+    grid-template-columns: 1fr;
+  }
+
+  .masonry-column {
+    display: contents;
   }
 
   .insight-card {
