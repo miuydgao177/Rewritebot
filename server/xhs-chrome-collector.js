@@ -54,6 +54,8 @@ export async function collectXhsNotesFromChrome({
 
       scanRounds += 1;
       let newlyScanned = 0;
+      let beforeScrollState = null;
+      let afterScrollState = null;
 
       for (const note of batch) {
         if (!scannedUrls.has(note.url)) {
@@ -68,8 +70,13 @@ export async function collectXhsNotesFromChrome({
         }
       }
 
-      stagnantRounds = newlyScanned === 0 ? stagnantRounds + 1 : 0;
       if (seen.size >= targetCount) break;
+
+      try {
+        beforeScrollState = await client.readFeedState();
+      } catch (error) {
+        if (!isTransientDevtoolsError(error)) throw error;
+      }
 
       try {
         await client.scrollResults(minLikes ? 6 : 2);
@@ -84,6 +91,13 @@ export async function collectXhsNotesFromChrome({
         if (!isTransientDevtoolsError(error)) throw error;
       }
       await client.sleep(activeWaitPatternMs[patternIndex % activeWaitPatternMs.length]);
+      try {
+        afterScrollState = await client.readFeedState();
+      } catch (error) {
+        if (!isTransientDevtoolsError(error)) throw error;
+      }
+
+      stagnantRounds = isFeedStagnant({ newlyScanned, beforeScrollState, afterScrollState }) ? stagnantRounds + 1 : 0;
       patternIndex += 1;
     }
 
@@ -107,6 +121,16 @@ export async function collectXhsNotesFromChrome({
 function calculateScanBudget({ targetCount, minLikes, maxScanRounds }) {
   if (!minLikes) return maxScanRounds;
   return Math.max(maxScanRounds, targetCount * FILTERED_SCAN_MULTIPLIER, 80);
+}
+
+function isFeedStagnant({ newlyScanned, beforeScrollState, afterScrollState }) {
+  if (newlyScanned > 0) return false;
+  if (!beforeScrollState || !afterScrollState) return true;
+
+  const gainedLinks = afterScrollState.noteLinkCount > beforeScrollState.noteLinkCount;
+  const movedDown = afterScrollState.maxScrollTop > beforeScrollState.maxScrollTop + 20;
+  const grewPage = afterScrollState.maxScrollHeight > beforeScrollState.maxScrollHeight + 20;
+  return !gainedLinks && !movedDown && !grewPage;
 }
 
 async function reconnectXhsChromeTab(client, keyword) {
@@ -266,25 +290,45 @@ class CdpClient {
   async scrollResults(repeats = 1) {
     await this.evaluate(`(() => {
       const candidates = [
+        window,
         document.scrollingElement,
         document.documentElement,
         document.body,
         ...Array.from(document.querySelectorAll('.feeds-page, .search-layout, .search-layout__main, .feeds-container, [class*=scroll], [class*=container]'))
       ].filter(Boolean);
-      const target = candidates.find((element) => element.scrollHeight > element.clientHeight + 20) || document.scrollingElement || document.body;
+      const targets = candidates.filter((element) => {
+        if (element === window) return true;
+        return element.scrollHeight > element.clientHeight + 20;
+      });
       const repeats = ${Number(repeats)};
       for (let index = 0; index < repeats; index += 1) {
-        const before = target.scrollTop || document.scrollingElement?.scrollTop || window.scrollY || 0;
-        const viewportHeight = window.innerHeight || target.clientHeight || 900;
+        const viewportHeight = window.innerHeight || document.documentElement?.clientHeight || 900;
         const distance = Math.max(1600, viewportHeight * 1.8);
-        target.scrollBy({ top: distance, behavior: 'auto' });
-        target.dispatchEvent(new WheelEvent('wheel', { deltaY: distance, bubbles: true }));
-        const after = target.scrollTop || document.scrollingElement?.scrollTop || window.scrollY || 0;
-        if (after === before && document.scrollingElement && document.scrollingElement !== target) {
-          document.scrollingElement.scrollBy({ top: distance, behavior: 'auto' });
+        window.scrollBy({ top: distance, behavior: 'auto' });
+        for (const target of targets) {
+          if (target === window) continue;
+          target.scrollBy({ top: distance, behavior: 'auto' });
+          target.dispatchEvent(new WheelEvent('wheel', { deltaY: distance, bubbles: true }));
         }
+        document.dispatchEvent(new WheelEvent('wheel', { deltaY: distance, bubbles: true }));
       }
       return true;
+    })()`);
+  }
+
+  async readFeedState() {
+    return this.evaluate(`(() => {
+      const isSearchNoteUrl = ${isSearchNoteUrl.toString()};
+      const elements = [
+        document.scrollingElement,
+        document.documentElement,
+        document.body,
+        ...Array.from(document.querySelectorAll('.feeds-page, .search-layout, .search-layout__main, .feeds-container, [class*=scroll], [class*=container]'))
+      ].filter(Boolean);
+      const maxScrollTop = Math.max(window.scrollY || 0, ...elements.map((element) => element.scrollTop || 0));
+      const maxScrollHeight = Math.max(document.body?.scrollHeight || 0, document.documentElement?.scrollHeight || 0, ...elements.map((element) => element.scrollHeight || 0));
+      const noteLinkCount = new Set(Array.from(document.querySelectorAll('a[href]')).map((a) => a.href || '').filter((href) => isSearchNoteUrl(href))).size;
+      return { maxScrollTop, maxScrollHeight, noteLinkCount };
     })()`);
   }
 
