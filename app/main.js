@@ -107,6 +107,7 @@ function renderCurrentDiscovery() {
 function formatResultCount(noteCount, meta = {}) {
   const parts = [`${noteCount} 条素材`];
   if (meta.scannedCount) parts.push(`扫描 ${meta.scannedCount} 条`);
+  if (meta.requestedCount && noteCount < meta.requestedCount) parts.push(`未满 ${meta.requestedCount} 条`);
   if (meta.scanBudget && meta.scannedCount >= meta.scanBudget) parts.push("已到扫描上限");
   else if (meta.stagnantLimit && meta.scannedCount && meta.matchedCount < meta.requestedCount && meta.elapsedMs) parts.push("继续下拉中断");
   if (meta.timedOut) parts.push("已到时间上限");
@@ -117,9 +118,7 @@ function renderRewriteOutputs() {
   const selectedNotes = getContentNotesByIds(appState.selectedNoteIds);
   const outputs = createRewritePreviewOutputs(selectedNotes);
 
-  elements.outputDocs.article.innerHTML = outputs.article;
-  elements.outputDocs.video.innerHTML = outputs.video;
-  elements.outputDocs.brief.innerHTML = outputs.brief;
+  setOutputDocs(outputs);
 }
 
 async function generateAndShowOutputs() {
@@ -135,14 +134,14 @@ async function generateAndShowOutputs() {
 
   try {
     const outputs = await requestRewriteOutputs(selectedNotes, readRewriteOptions());
-    elements.outputDocs.article.innerHTML = outputs.article;
-    elements.outputDocs.video.innerHTML = outputs.video;
-    elements.outputDocs.brief.innerHTML = outputs.brief;
+    setOutputDocs(outputs);
   } catch (error) {
     const message = `<p class="empty"><strong>二创生成没有完成。</strong><br>${formatUserFacingError(error)}</p>`;
-    elements.outputDocs.article.innerHTML = message;
-    elements.outputDocs.video.innerHTML = message;
-    elements.outputDocs.brief.innerHTML = message;
+    setOutputDocs({
+      article: message,
+      video: message,
+      brief: message,
+    });
   }
 }
 
@@ -153,9 +152,17 @@ function formatUserFacingError(error) {
 
 function setRewriteLoadingState() {
   const message = `<p class="empty">正在根据已选真实素材、故事设定和文风要求生成新内容。</p>`;
-  elements.outputDocs.article.innerHTML = message;
-  elements.outputDocs.video.innerHTML = message;
-  elements.outputDocs.brief.innerHTML = message;
+  setOutputDocs({
+    article: message,
+    video: message,
+    brief: message,
+  });
+}
+
+function setOutputDocs(outputs) {
+  elements.outputDocs.article.innerHTML = outputs.article;
+  elements.outputDocs.video.innerHTML = outputs.video;
+  elements.outputDocs.brief.innerHTML = outputs.brief;
 }
 
 function toggleSelectedNote(noteId) {

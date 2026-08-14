@@ -4,11 +4,11 @@ const DEVTOOLS_LIST_URL = "http://127.0.0.1:9222/json/list";
 const SEARCH_BASE_URL = "https://www.xiaohongshu.com/search_result";
 const DEFAULT_WAIT_PATTERN_MS = [7000, 5000, 13000, 8000];
 const DEFAULT_TARGET_COUNT = 50;
-const DEFAULT_MAX_SCAN_ROUNDS = 40;
-const FILTERED_SCAN_MULTIPLIER = 10;
-const DEFAULT_SEARCH_TIMEOUT_MS = 90000;
-const DEFAULT_FILTERED_SEARCH_TIMEOUT_MS = 180000;
-const FAST_FILTER_WAIT_PATTERN_MS = [1200, 1500, 2000, 2000];
+const DEFAULT_MAX_SCAN_ROUNDS = 60;
+const FILTERED_SCAN_MULTIPLIER = 14;
+const DEFAULT_SEARCH_TIMEOUT_MS = 120000;
+const DEFAULT_FILTERED_SEARCH_TIMEOUT_MS = 240000;
+const FAST_FILTER_WAIT_PATTERN_MS = [2500, 3000, 3500, 4500];
 
 export async function collectXhsNotesFromChrome({
   keyword,
@@ -22,7 +22,7 @@ export async function collectXhsNotesFromChrome({
 }) {
   let client = await connectToXhsChromeTab(keyword);
   const scanBudget = calculateScanBudget({ targetCount, minLikes, maxScanRounds });
-  const stagnantLimit = minLikes ? Math.max(maxStagnantRounds, 24) : maxStagnantRounds;
+  const stagnantLimit = minLikes ? Math.max(maxStagnantRounds, 36) : maxStagnantRounds;
   const startedAt = Date.now();
   const activeWaitPatternMs = minLikes ? FAST_FILTER_WAIT_PATTERN_MS : waitPatternMs;
   const activeTimeoutMs = minLikes ? Math.max(timeoutMs, DEFAULT_FILTERED_SEARCH_TIMEOUT_MS) : timeoutMs;
@@ -77,7 +77,7 @@ export async function collectXhsNotesFromChrome({
       if (seen.size >= targetCount) break;
 
       try {
-        await client.scrollResults(minLikes ? 4 : 1);
+        await client.scrollResults(minLikes ? 6 : 2);
       } catch (error) {
         if (!isTransientDevtoolsError(error) || reconnects >= 3) throw error;
         client.close();
@@ -88,7 +88,7 @@ export async function collectXhsNotesFromChrome({
         reconnects += 1;
       }
       try {
-        await client.waitForMoreNotes(scannedUrls.size, minLikes ? 2200 : 5000);
+        await client.waitForMoreNotes(scannedUrls.size, minLikes ? 4500 : 6500);
       } catch (error) {
         if (!isTransientDevtoolsError(error)) throw error;
       }

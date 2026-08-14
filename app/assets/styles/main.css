@@ -307,11 +307,10 @@ textarea:focus {
 
 .content-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 12px;
-  max-height: calc(100vh - 206px);
   padding: 16px 20px;
-  overflow: auto;
+  align-content: start;
 }
 
 .content-card {
@@ -487,11 +486,6 @@ textarea:focus {
 @media (max-width: 1180px) {
   .workspace {
     grid-template-columns: 300px 1fr;
-  }
-
-  .content-grid {
-    grid-template-columns: 1fr;
-    max-height: none;
   }
 
   .output-panel {

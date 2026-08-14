@@ -5,8 +5,7 @@ export async function generateRewriteOutputs({ notes, options }) {
   const provider = getModelProvider();
   if (!provider) throw new Error("二创生成未激活：请先配置 DEEPSEEK_API_KEY、OPENROUTER_API_KEY 或 OPENAI_API_KEY，然后重启本地服务。");
 
-  const payload = await requestModelCompletion(provider, notes, options);
-  const outputs = parseRewriteContent(readCompletionContent(payload));
+  const outputs = await requestModelCompletion(provider, notes, options);
   return normalizeRewriteOutputs(outputs);
 }
 
@@ -20,7 +19,7 @@ async function requestModelCompletion(provider, notes, options) {
         const payload = await requestModelCompletionWithModel(provider, model, notes, options);
         const outputs = parseRewriteContent(readCompletionContent(payload));
         validateRewriteOutputs(outputs);
-        return payload;
+        return outputs;
       } catch (error) {
         lastError = error;
         if (!isRetryableModelError(error)) throw normalizeModelError(error);
