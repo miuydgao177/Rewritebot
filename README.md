@@ -1,58 +1,115 @@
 # 社媒内容运营创作助手
 
-一个面向小红书内容运营的创作助手，用来从已登录 Chrome 的小红书页面采集素材、提炼洞察，并生成文章二创和视频脚本。
+一个面向小红书内容运营的本地创作助手。
 
-## 当前能力
+它做三件事：
+- 从已登录的 Chrome 小红书页面采集真实可见内容
+- 从选中的素材里提炼洞察
+- 生成文章二创、视频脚本和运营简报
 
-- 根据关键词打开已登录 Chrome 中的小红书搜索页，并提取页面真实可见结果
-- 支持按图文、视频类型筛选
-- 支持选择素材并自动归纳高频痛点、方法和高点击开头
-- 根据已选素材生成文章二创，可选择新故事创作、文章结构重写、攻略/清单整理
-- 支持设置故事主角、文风要求和二创方向
-- 根据已选素材生成短视频脚本
-- 输出运营简报和合规提醒
+## 核心能力
+
+- 真实抓取：不使用模拟数据，不用别的平台内容替代小红书结果
+- 素材筛选：支持关键词、内容类型、最低点赞数、采集数量
+- 素材选择：支持手动勾选素材进入二创池
+- 二创生成：支持新故事创作、文章结构重写、攻略/清单整理
+- 脚本输出：生成可直接拍摄的视频脚本
+- 运营辅助：自动输出主题洞察、素材共性和发布建议
+
+## 工作流
+
+1. 在已登录的 Chrome 里打开小红书搜索页
+2. 在本地页面输入关键词并点击搜索
+3. 选择需要二创的素材
+4. 填写故事设定、文风要求和二创方向
+5. 点击生成，得到文章、视频脚本和运营简报
 
 ## 运行方式
 
-启动本地服务和抓取 API：
+### 1. 安装依赖
+
+```bash
+npm install
+```
+
+### 2. 配置环境变量
+
+复制 `.env.example` 为 `.env`，然后按需填写：
+
+```text
+DEEPSEEK_API_KEY=你的 DeepSeek key
+DEEPSEEK_MODEL=deepseek-v4-flash
+
+OPENROUTER_API_KEY=你的 OpenRouter key
+OPENROUTER_MODEL=nvidia/nemotron-3.5-lightning:free
+
+OPENAI_API_KEY=你的 OpenAI key
+OPENAI_MODEL=gpt-4o-mini
+```
+
+说明：
+- 二创生成优先使用 `DEEPSEEK_API_KEY`
+- 没有 DeepSeek 时会尝试 OpenRouter，再尝试 OpenAI
+- 没有配置任何 key 时，搜索和选素材仍可用，但“生成二创”不会激活
+
+### 3. 启动服务
 
 ```bash
 npm start
 ```
 
-然后访问：
+打开：
 
 ```text
 http://localhost:3001
 ```
 
-## 二创生成配置
+## Chrome 与小红书采集要求
 
-二创生成优先使用 DeepSeek，兼容 OpenRouter 和 OpenAI。
+这个项目不是直接爬网页源码，而是控制你本机已登录的 Chrome。
 
-1. 复制 `.env.example` 为 `.env`
-2. 在 `.env` 填入：
+你需要让 Chrome 带远程调试端口启动，并先登录小红书：
 
-```text
-DEEPSEEK_API_KEY=你的 DeepSeek key
-DEEPSEEK_MODEL=deepseek-v4-flash
+```bash
+open -a "Google Chrome" --args --remote-debugging-port=9222
 ```
 
-如果不用 DeepSeek，也可以配置 OpenRouter：
+如果你使用的是 macOS，请确保：
+- Chrome 已启动
+- 已登录小红书
+- 小红书搜索页已经能正常显示内容
 
-```text
-OPENROUTER_API_KEY=你的 OpenRouter key
-OPENROUTER_MODEL=nvidia/nemotron-3.5-lightning:free
-```
+如果页面出现验证码、限制访问、加载中断或旧标签页停留在别的关键词上，系统会提示结果不足或抓取失败。
 
-也可以配置 OpenAI：
+## 数据来源
 
-```text
-OPENAI_API_KEY=你的 OpenAI key
-OPENAI_MODEL=gpt-4o-mini
-```
+当前版本只使用小红书搜索页的真实可见内容：
+- 笔记标题
+- 作者
+- 点赞数
+- 收藏数
+- 封面图
+- 来源链接
 
-配置后重启 `npm start`。没有配置 key 时，搜索和素材选择仍可使用，但点击“生成二创”会明确提示生成未激活。
+不做这些事：
+- 不用模拟数据
+- 不抓知乎、头条、网易、搜狐等其他平台替代
+- 不绕过登录、验证码或平台权限边界
+
+## 二创生成说明
+
+生成模块会把你选中的真实素材交给模型，按你设置的：
+- 成稿类型
+- 故事主角设定
+- 文风要求
+- 二创方向
+
+来输出完整成稿。
+
+支持的成稿类型：
+- 新故事创作
+- 文章结构重写
+- 攻略/清单整理
 
 ## 项目结构
 
@@ -60,45 +117,101 @@ OPENAI_MODEL=gpt-4o-mini
 app/
 ├── assets/
 │   └── styles/
-│       └── main.css                  # 全局布局、组件样式和设计变量
+│       └── main.css
 ├── features/
 │   ├── content-discovery/
-│   │   ├── discovery-view.js         # 素材列表和洞察区域渲染
-│   │   └── search-service.js         # 调用 /api/search，并缓存当前搜索素材
+│   │   ├── discovery-view.js
+│   │   └── search-service.js
 │   └── content-rewrite/
-│       └── rewrite-service.js        # 二创预览、生成请求和洞察提取
+│       └── rewrite-service.js
 ├── shared/
-│   └── formatters.js                 # 通用格式化和集合工具
-├── index.html                        # 页面结构入口
-└── main.js                           # 应用状态、事件绑定和模块组装
+│   └── formatters.js
+├── index.html
+└── main.js
+
 server/
-├── index.js                          # 静态页面服务、搜索 API、图片代理和二创 API
-├── content-rewrite-generator.js       # 模型请求、失败重试、输出解析和基础校验
-├── env-loader.js                      # 加载本地 .env 配置
-├── model-provider.js                  # DeepSeek、OpenRouter、OpenAI 的模型配置选择
-├── rewrite-prompt.js                  # 二创提示词、故事创作规则和素材格式化
-└── xhs-chrome-collector.js           # 已登录 Chrome 小红书页面采集
+├── content-rewrite-generator.js
+├── env-loader.js
+├── index.js
+├── model-provider.js
+├── rewrite-prompt.js
+└── xhs-chrome-collector.js
 ```
 
-## 命名规范
+## 模块职责
 
-- 文件夹使用业务含义命名，例如 `content-discovery`、`content-rewrite`
-- 服务文件使用 `*-service.js`，只放业务逻辑，不直接操作 DOM
-- 视图文件使用 `*-view.js`，只负责把数据渲染成页面
-- `main.js` 只做应用启动、状态流转、事件绑定，不塞具体业务算法
-- `shared/` 只放跨功能复用的小工具，避免把业务逻辑放进去
+- `app/index.html`：页面骨架
+- `app/main.js`：应用状态、事件绑定、流程串联
+- `app/features/content-discovery/search-service.js`：调用搜索接口并缓存结果
+- `app/features/content-discovery/discovery-view.js`：渲染素材卡片和洞察
+- `app/features/content-rewrite/rewrite-service.js`：生成预览和请求正式二创
+- `app/shared/formatters.js`：通用格式化工具
+- `app/assets/styles/main.css`：全局布局和视觉样式
+- `server/index.js`：静态文件服务、搜索 API、图片代理、二创 API
+- `server/xhs-chrome-collector.js`：通过 Chrome DevTools Protocol 采集小红书结果
+- `server/content-rewrite-generator.js`：调用模型并校验输出
+- `server/model-provider.js`：选择 DeepSeek / OpenRouter / OpenAI
+- `server/rewrite-prompt.js`：拼装提示词和素材上下文
+- `server/env-loader.js`：读取本地 `.env`
 
-## 数据来源说明
+## 代码约定
 
-当前版本不使用模拟数据作为搜索结果。页面会请求 `GET /api/search`，服务端通过 Chrome DevTools Protocol 控制你已登录的小红书页面，打开对应关键词搜索页，并提取当前页面真实可见的笔记标题、作者、互动数、封面图和链接。
+- 文件夹按业务命名，例如 `content-discovery`、`content-rewrite`
+- `*-service.js` 只放业务逻辑，不直接操作 DOM
+- `*-view.js` 只负责渲染
+- `main.js` 只做状态和事件编排
+- `shared/` 只放跨模块复用的小工具
 
-搜索结果会做当前关键词相关性过滤，防止旧搜索页或旧标签页里的不相关内容混入当前素材池。
+## API 概览
 
-需要注意：
+### `GET /api/search`
 
-- 搜索目的地只接受小红书页面
-- 不使用知乎、头条、搜狐、网易等其他平台内容替代小红书结果
-- 只能读取当前登录态下页面正常展示的信息
-- 如果小红书限制访问、弹验证码、页面不继续加载，系统会显示抓取失败或结果不足
-- 不绕过平台登录、验证码、反爬限制或权限边界
-- 生产环境建议使用官方授权、企业数据服务或自有账号授权数据源
+参数：
+- `keyword`
+- `type`
+- `minLikes`
+- `targetCount`
+
+返回：
+- `notes`
+- `meta`
+
+### `POST /api/rewrite`
+
+请求体：
+
+```json
+{
+  "notes": [],
+  "options": {}
+}
+```
+
+返回：
+- `outputs.article`
+- `outputs.video`
+- `outputs.brief`
+
+### `GET /api/xhs-image`
+
+小红书封面图代理接口，用于显示可见图片。
+
+## 目前已知限制
+
+- 采集依赖你本机已登录的 Chrome
+- 小红书页面如果没切到对应关键词，结果会少
+- 页面如果没有继续加载，采集条数也会少
+- 二创生成依赖外部模型 key
+- 当前是本地工具，不是云端批量服务
+
+## 常用排查
+
+- 没有结果：确认小红书页面已登录、已打开搜索页、关键词一致
+- 结果太少：提高页面加载时间，降低最低点赞数，或减少过滤条件
+- 图片不显示：确认来源封面图可访问
+- 不能生成二创：检查 `.env` 里的模型 key 是否配置
+- 页面打不开：确认 `npm start` 已启动，默认端口是 `3001`
+
+## 许可证
+
+当前仓库未单独声明许可证，默认按项目内部使用处理。
