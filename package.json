@@ -1,0 +1,11 @@
+{
+  "name": "content-assistant",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js"
+  },
+  "devDependencies": {
+    "ws": "^8.21.3"
+  }
+}

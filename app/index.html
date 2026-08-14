@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>社媒内容运营创作助手</title>
+    <link rel="stylesheet" href="./assets/styles/main.css" />
+  </head>
+  <body>
+    <main class="workspace">
+      <aside class="panel control-panel">
+        <div class="brand">
+          <div class="mark">创</div>
+          <div>
+            <h1>社媒内容运营创作助手</h1>
+            <p>搜索素材，重组观点，生成二创稿件。</p>
+          </div>
+        </div>
+
+        <section class="block">
+          <label for="topic">选题关键词</label>
+          <div class="input-row">
+            <input id="topic" type="text" value="轻断食早餐" />
+            <button id="searchBtn" type="button">搜索</button>
+          </div>
+        </section>
+
+        <section class="block">
+          <label for="minLikes">最低点赞数</label>
+          <input id="minLikes" type="number" min="0" step="1" inputmode="numeric" placeholder="留空不过滤，例如 300" />
+        </section>
+
+        <section class="block">
+          <label for="targetCount">采集数量</label>
+          <input id="targetCount" type="number" min="1" max="100" step="1" inputmode="numeric" value="50" />
+        </section>
+
+        <section class="block">
+          <label>内容类型</label>
+          <div class="segmented" role="group" aria-label="内容类型">
+            <button class="segment active" data-type="all" type="button">全部</button>
+            <button class="segment" data-type="image" type="button">图文</button>
+            <button class="segment" data-type="video" type="button">视频</button>
+          </div>
+        </section>
+
+        <section class="block">
+          <label for="audience">目标人群</label>
+          <input id="audience" type="text" value="通勤上班族" placeholder="例如：留学生家长 / 职场新人 / 减脂人群" />
+        </section>
+
+        <section class="block">
+          <label for="tone">创作语气</label>
+          <select id="tone">
+            <option>人物故事型</option>
+            <option>真实分享型</option>
+            <option>口语叙事型</option>
+            <option>观点随笔型</option>
+            <option>清单攻略型</option>
+          </select>
+        </section>
+
+        <section class="block">
+          <label for="contentMode">成稿类型</label>
+          <select id="contentMode">
+            <option value="story">新故事创作</option>
+            <option value="rewrite">文章结构重写</option>
+            <option value="guide">攻略/清单整理</option>
+          </select>
+        </section>
+
+        <section class="block">
+          <label for="storyBrief">故事主角设定</label>
+          <textarea id="storyBrief" placeholder="例如：一个德国人在中国定居 15 年，因为一次深夜被邻居帮助，决定留下来。">一个老外在中国定居多年，从一件很小的日常小事里，慢慢觉得这里像家。</textarea>
+        </section>
+
+        <section class="block">
+          <label for="styleGuide">文风要求</label>
+          <textarea id="styleGuide" placeholder="例如：像朋友聊天，不要宏大总结；多写具体画面和动作；少用金句。">口语化、有人味、像真实故事，不要写成新闻稿、总结报告或鸡汤文。多写具体场景、动作和对话，少用抽象大词。</textarea>
+        </section>
+
+        <section class="block">
+          <label for="angle">二创方向</label>
+          <textarea id="angle" placeholder="例如：把素材里的共性细节变成一个老外在中国生活的完整故事，不要逐条概括原文。"></textarea>
+        </section>
+
+        <button class="full-action" id="quickGenerateBtn" type="button">开始二创</button>
+
+        <section class="notice">
+          <strong>数据源说明</strong>
+          <p>当前版本会调用已登录 Chrome 中的小红书页面采集真实可见内容。若页面不继续加载或出现访问限制，系统会明确提示结果不足。</p>
+        </section>
+      </aside>
+
+      <section class="main-panel">
+        <header class="topbar">
+          <div>
+            <h2>素材搜索与洞察</h2>
+          </div>
+          <div class="status">
+            <span id="resultCount">0 条素材</span>
+            <span id="selectedCount">0 已选</span>
+          </div>
+        </header>
+
+        <div class="insight-strip" id="insights"></div>
+
+        <div class="content-grid" id="results"></div>
+      </section>
+
+      <aside class="panel output-panel">
+        <div class="output-head">
+          <div>
+            <h2>二创输出</h2>
+          </div>
+          <button id="generateBtn" type="button">生成二创</button>
+        </div>
+
+        <section class="tabs" aria-label="输出类型">
+          <button class="tab active" data-tab="article" type="button">文章二创</button>
+          <button class="tab" data-tab="video" type="button">视频脚本</button>
+          <button class="tab" data-tab="brief" type="button">运营简报</button>
+        </section>
+
+        <section class="output-body">
+          <article class="output-doc active" id="articleDoc"></article>
+          <article class="output-doc" id="videoDoc"></article>
+          <article class="output-doc" id="briefDoc"></article>
+        </section>
+      </aside>
+    </main>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
