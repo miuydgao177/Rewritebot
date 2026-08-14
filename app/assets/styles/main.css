@@ -343,7 +343,7 @@ textarea:focus {
 
 .content-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 12px;
   padding: 16px 18px 20px;
   align-content: start;
@@ -351,7 +351,7 @@ textarea:focus {
 
 .content-card {
   display: grid;
-  grid-template-columns: 148px minmax(0, 1fr);
+  grid-template-columns: 1fr;
   border: 1px solid var(--line);
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.72);
@@ -371,8 +371,9 @@ textarea:focus {
 
 .thumb {
   position: relative;
-  min-height: 100%;
-  border-right: 1px solid var(--line);
+  aspect-ratio: 4 / 3;
+  min-height: 132px;
+  border-bottom: 1px solid var(--line);
   background: linear-gradient(180deg, rgba(240, 243, 244, 0.92), rgba(229, 234, 236, 0.92));
   overflow: hidden;
 }
@@ -402,14 +403,14 @@ textarea:focus {
 }
 
 .card-body {
-  padding: 12px 12px 12px 14px;
+  padding: 11px 12px 12px;
 }
 
 .meta {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   color: var(--muted);
   font-size: 11px;
   font-weight: 600;
@@ -424,33 +425,33 @@ textarea:focus {
 }
 
 .card-title {
-  margin-bottom: 6px;
-  font-size: 16px;
-  line-height: 1.38;
+  margin-bottom: 4px;
+  font-size: 15px;
+  line-height: 1.42;
   -webkit-line-clamp: 2;
 }
 
 .card-summary {
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   color: #4d534f;
-  line-height: 1.62;
-  font-size: 13px;
-  -webkit-line-clamp: 2;
+  line-height: 1.55;
+  font-size: 12px;
+  -webkit-line-clamp: 1;
 }
 
 .tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 4px;
 }
 
 .tags span {
-  padding: 3px 7px;
+  padding: 3px 6px;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.72);
   color: #59615b;
-  font-size: 11px;
+  font-size: 10px;
 }
 
 .select-row {
@@ -458,14 +459,14 @@ textarea:focus {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .select-row small {
   color: var(--muted);
   line-height: 1.45;
-  font-size: 12px;
-  -webkit-line-clamp: 2;
+  font-size: 11px;
+  -webkit-line-clamp: 1;
 }
 
 .select-row button {
@@ -485,9 +486,9 @@ textarea:focus {
 
 .source-link {
   display: inline-flex;
-  margin-top: 8px;
+  margin-top: 6px;
   color: #4d534f;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 650;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -595,7 +596,5 @@ textarea:focus {
 
   .thumb {
     min-height: 120px;
-    border-right: 0;
-    border-bottom: 1px solid var(--line);
   }
 }
