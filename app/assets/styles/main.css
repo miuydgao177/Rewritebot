@@ -342,26 +342,24 @@ textarea:focus {
 }
 
 .content-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  column-count: 3;
+  column-gap: 10px;
   padding: 16px 18px 20px;
 }
 
 .masonry-column {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 10px;
+  display: contents;
 }
 
 .content-card {
-  display: grid;
-  grid-template-columns: 1fr;
+  display: inline-block;
   width: 100%;
+  margin: 0 0 10px;
   border: 1px solid var(--line);
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.72);
+  break-inside: avoid;
+  page-break-inside: avoid;
   overflow: hidden;
   box-shadow: 0 12px 28px rgba(30, 36, 40, 0.06);
   transition:
@@ -559,13 +557,13 @@ textarea:focus {
   color: var(--muted);
 }
 
-@media (max-width: 1180px) {
+@media (max-width: 920px) {
   .workspace {
     grid-template-columns: 300px 1fr;
   }
 
   .content-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-count: 2;
   }
 
   .output-panel {
@@ -573,7 +571,7 @@ textarea:focus {
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 680px) {
   .workspace {
     grid-template-columns: 1fr;
     padding: 10px;
@@ -587,7 +585,7 @@ textarea:focus {
 
   .insight-strip,
   .content-grid {
-    grid-template-columns: 1fr;
+    column-count: 1;
   }
 
   .masonry-column {
@@ -601,10 +599,6 @@ textarea:focus {
 
   .insight-card:last-child {
     border-bottom: 0;
-  }
-
-  .content-card {
-    grid-template-columns: 1fr;
   }
 
   .thumb {
