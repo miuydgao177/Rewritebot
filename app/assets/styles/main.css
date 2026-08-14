@@ -342,20 +342,23 @@ textarea:focus {
 }
 
 .content-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 12px;
+  display: block;
+  column-count: 3;
+  column-gap: 12px;
   padding: 16px 18px 20px;
-  align-content: start;
 }
 
 .content-card {
-  display: grid;
+  display: inline-grid;
   grid-template-columns: 1fr;
+  width: 100%;
+  margin: 0 0 12px;
   border: 1px solid var(--line);
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.72);
   overflow: hidden;
+  break-inside: avoid;
+  page-break-inside: avoid;
   box-shadow: 0 12px 28px rgba(30, 36, 40, 0.06);
   transition:
     transform 160ms ease,
@@ -372,7 +375,7 @@ textarea:focus {
 .thumb {
   position: relative;
   aspect-ratio: 4 / 3;
-  min-height: 132px;
+  min-height: 88px;
   border-bottom: 1px solid var(--line);
   background: linear-gradient(180deg, rgba(240, 243, 244, 0.92), rgba(229, 234, 236, 0.92));
   overflow: hidden;
@@ -391,28 +394,28 @@ textarea:focus {
 
 .type-badge {
   position: absolute;
-  left: 12px;
-  top: 12px;
-  padding: 4px 7px;
+  left: 8px;
+  top: 8px;
+  padding: 3px 6px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.92);
   color: #343936;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 650;
 }
 
 .card-body {
-  padding: 11px 12px 12px;
+  padding: 9px 10px 10px;
 }
 
 .meta {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
 }
 
@@ -425,17 +428,17 @@ textarea:focus {
 }
 
 .card-title {
-  margin-bottom: 4px;
-  font-size: 15px;
-  line-height: 1.42;
+  margin-bottom: 5px;
+  font-size: 13px;
+  line-height: 1.36;
   -webkit-line-clamp: 2;
 }
 
 .card-summary {
-  margin-bottom: 6px;
+  margin-bottom: 5px;
   color: #4d534f;
-  line-height: 1.55;
-  font-size: 12px;
+  line-height: 1.45;
+  font-size: 11px;
   -webkit-line-clamp: 1;
 }
 
@@ -458,8 +461,8 @@ textarea:focus {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  margin-top: 8px;
+  gap: 8px;
+  margin-top: 7px;
 }
 
 .select-row small {
@@ -470,12 +473,13 @@ textarea:focus {
 }
 
 .select-row button {
-  height: 32px;
+  height: 28px;
   flex: 0 0 auto;
-  padding: 0 11px;
+  padding: 0 9px;
   border-radius: 8px;
   color: var(--ink);
   background: rgba(236, 238, 237, 0.88);
+  font-size: 12px;
   font-weight: 650;
 }
 
@@ -486,9 +490,9 @@ textarea:focus {
 
 .source-link {
   display: inline-flex;
-  margin-top: 6px;
+  margin-top: 5px;
   color: #4d534f;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 650;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -555,6 +559,10 @@ textarea:focus {
     grid-template-columns: 300px 1fr;
   }
 
+  .content-grid {
+    column-count: 3;
+  }
+
   .output-panel {
     grid-column: 1 / -1;
   }
@@ -574,7 +582,7 @@ textarea:focus {
 
   .insight-strip,
   .content-grid {
-    grid-template-columns: 1fr;
+    column-count: 1;
   }
 
   .insight-card {
@@ -584,10 +592,6 @@ textarea:focus {
 
   .insight-card:last-child {
     border-bottom: 0;
-  }
-
-  .content-grid {
-    max-height: none;
   }
 
   .content-card {
