@@ -125,7 +125,8 @@ app/
 │   └── content-rewrite/
 │       └── rewrite-service.js
 ├── shared/
-│   └── formatters.js
+│   ├── formatters.js
+│   └── number-utils.js
 ├── index.html
 └── main.js
 
@@ -146,6 +147,7 @@ server/
 - `app/features/content-discovery/discovery-view.js`：渲染素材卡片和洞察
 - `app/features/content-rewrite/rewrite-service.js`：生成预览和请求正式二创
 - `app/shared/formatters.js`：通用格式化工具
+- `app/shared/number-utils.js`：前后端共用的数字解析和范围限制
 - `app/assets/styles/main.css`：全局布局和视觉样式
 - `server/index.js`：静态文件服务、搜索 API、图片代理、二创 API
 - `server/xhs-chrome-collector.js`：通过 Chrome DevTools Protocol 采集小红书结果

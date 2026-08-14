@@ -13,7 +13,7 @@ async function requestModelCompletion(provider, notes, options) {
   const models = buildModelCandidates(provider);
   let lastError = null;
 
-  for (const model of [...new Set(models)]) {
+  for (const model of models) {
     for (let attempt = 1; attempt <= 2; attempt += 1) {
       try {
         const payload = await requestModelCompletionWithModel(provider, model, notes, options);

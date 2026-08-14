@@ -47,12 +47,7 @@ export async function collectXhsNotesFromChrome({
         batch = await client.collectNotes();
       } catch (error) {
         if (!isTransientDevtoolsError(error) || reconnects >= 3) throw error;
-        client.close();
-        client = await connectToXhsChromeTab(keyword);
-        await client.send("Page.enable");
-        await client.send("Runtime.enable");
-        await client.waitForSearchKeyword(keyword, 8000);
-        await client.sleep(2500);
+        client = await reconnectXhsChromeTab(client, keyword);
         reconnects += 1;
         continue;
       }
@@ -80,11 +75,7 @@ export async function collectXhsNotesFromChrome({
         await client.scrollResults(minLikes ? 6 : 2);
       } catch (error) {
         if (!isTransientDevtoolsError(error) || reconnects >= 3) throw error;
-        client.close();
-        client = await connectToXhsChromeTab(keyword);
-        await client.send("Page.enable");
-        await client.send("Runtime.enable");
-        await client.waitForSearchKeyword(keyword, 8000);
+        client = await reconnectXhsChromeTab(client, keyword);
         reconnects += 1;
       }
       try {
@@ -116,6 +107,16 @@ export async function collectXhsNotesFromChrome({
 function calculateScanBudget({ targetCount, minLikes, maxScanRounds }) {
   if (!minLikes) return maxScanRounds;
   return Math.max(maxScanRounds, targetCount * FILTERED_SCAN_MULTIPLIER, 80);
+}
+
+async function reconnectXhsChromeTab(client, keyword) {
+  client.close();
+  const nextClient = await connectToXhsChromeTab(keyword);
+  await nextClient.send("Page.enable");
+  await nextClient.send("Runtime.enable");
+  await nextClient.waitForSearchKeyword(keyword, 8000);
+  await nextClient.sleep(2500);
+  return nextClient;
 }
 
 async function connectToXhsChromeTab(keyword) {

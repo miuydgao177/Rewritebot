@@ -71,12 +71,12 @@ async function renderContentDiscovery() {
     elements.resultCount.textContent = "搜索失败";
     elements.selectedCount.textContent = "0 已选";
     renderDiscoveryInsights(elements.discoveryInsights, extractDiscoveryInsights([]));
-    elements.searchResults.innerHTML = `<p class="empty"><strong>真实网页搜索没有完成。</strong><br>${formatUserFacingSearchError(error)}</p>`;
+    elements.searchResults.innerHTML = `<p class="empty"><strong>真实网页搜索没有完成。</strong><br>${formatSearchErrorMessage(error)}</p>`;
     renderRewriteOutputs();
   }
 }
 
-function formatUserFacingSearchError(error) {
+function formatSearchErrorMessage(error) {
   const message = error?.message || "未知错误";
   if (/关键词/.test(message)) return message;
   if (/时间上限/.test(message) || /扫描上限/.test(message) || /继续下拉中断/.test(message)) return message;
@@ -126,7 +126,7 @@ async function generateAndShowOutputs() {
     const outputs = await requestRewriteOutputs(selectedNotes, readRewriteOptions());
     setOutputDocs(outputs);
   } catch (error) {
-    const message = `<p class="empty"><strong>二创生成没有完成。</strong><br>${formatUserFacingError(error)}</p>`;
+    const message = `<p class="empty"><strong>二创生成没有完成。</strong><br>${formatRewriteErrorMessage(error)}</p>`;
     setOutputDocs({
       article: message,
       video: message,
@@ -135,7 +135,7 @@ async function generateAndShowOutputs() {
   }
 }
 
-function formatUserFacingError(error) {
+function formatRewriteErrorMessage(error) {
   if (/terminated|timeout|aborted|fetch failed/i.test(error.message || "")) return "模型接口连接中断或超时，请重新点击生成。";
   return error.message;
 }
