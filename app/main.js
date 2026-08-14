@@ -1,6 +1,7 @@
 import { renderDiscoveryInsights, renderSearchResults } from "./features/content-discovery/discovery-view.js";
 import { getContentNotesByIds, getCurrentSearchMeta, searchContentNotes } from "./features/content-discovery/search-service.js";
 import { createRewritePreviewOutputs, extractDiscoveryInsights, generateRewriteOutputs as requestRewriteOutputs } from "./features/content-rewrite/rewrite-service.js";
+import { parseBoundedInteger, parsePositiveInteger } from "./shared/number-utils.js";
 
 const appState = {
   contentType: "all",
@@ -34,20 +35,9 @@ function readSearchFilters() {
   return {
     keyword: elements.topicInput.value,
     contentType: appState.contentType,
-    minLikes: parseOptionalNumber(elements.minLikesInput.value),
-    targetCount: parseBoundedNumber(elements.targetCountInput.value, 50, 1, 100),
+    minLikes: parsePositiveInteger(elements.minLikesInput.value),
+    targetCount: parseBoundedInteger(elements.targetCountInput.value, 50, 1, 100),
   };
-}
-
-function parseOptionalNumber(value) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : null;
-}
-
-function parseBoundedNumber(value, fallback, min, max) {
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed)) return fallback;
-  return Math.min(max, Math.max(min, Math.floor(parsed)));
 }
 
 function readRewriteOptions() {

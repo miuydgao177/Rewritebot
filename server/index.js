@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { generateRewriteOutputs } from "./content-rewrite-generator.js";
 import { loadLocalEnv } from "./env-loader.js";
 import { collectXhsNotesFromChrome } from "./xhs-chrome-collector.js";
+import { parseBoundedInteger, parsePositiveInteger } from "../app/shared/number-utils.js";
 
 const PORT = Number(process.env.PORT || 3001);
 const PROJECT_ROOT = fileURLToPath(new URL("../", import.meta.url));
@@ -79,8 +80,8 @@ async function readJsonBody(request) {
 async function handleSearchRequest(requestUrl, response) {
   const keyword = requestUrl.searchParams.get("keyword")?.trim();
   const contentType = requestUrl.searchParams.get("type") || "all";
-  const minLikes = parseOptionalNumber(requestUrl.searchParams.get("minLikes"));
-  const targetCount = parseBoundedNumber(requestUrl.searchParams.get("targetCount"), 50, 1, 100);
+  const minLikes = parsePositiveInteger(requestUrl.searchParams.get("minLikes"));
+  const targetCount = parseBoundedInteger(requestUrl.searchParams.get("targetCount"), 50, 1, 100);
 
   if (!keyword) {
     sendJson(response, 400, { error: "请输入选题关键词" });
@@ -94,18 +95,6 @@ async function handleSearchRequest(requestUrl, response) {
     meta: notes.meta || {},
     notes,
   });
-}
-
-function parseOptionalNumber(value) {
-  if (!value) return null;
-  const parsed = Number(value);
-  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : null;
-}
-
-function parseBoundedNumber(value, fallback, min, max) {
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed)) return fallback;
-  return Math.min(max, Math.max(min, Math.floor(parsed)));
 }
 
 async function handleXhsImageRequest(requestUrl, response) {
