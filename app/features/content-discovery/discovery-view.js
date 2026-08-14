@@ -20,9 +20,11 @@ export function renderSearchResults(container, notes, selectedNoteIds) {
 function createNoteCard(note, selectedNoteIds) {
   const isSelected = selectedNoteIds.has(note.id);
   const typeText = note.type === "video" ? "视频" : "图文";
+  const tags = (note.tags || []).slice(0, 3);
   const coverImage = note.coverImageUrl
     ? `<img class="thumb-image" src="${createImageProxyUrl(note.coverImageUrl)}" alt="${note.title}" loading="lazy">`
     : "";
+  const summary = note.summary && note.summary !== note.title ? `<p class="card-summary">${note.summary}</p>` : "";
 
   return `
     <article class="content-card">
@@ -36,11 +38,11 @@ function createNoteCard(note, selectedNoteIds) {
           <span>${formatChineseNumber(note.likes)} 赞</span>
           <span>${formatChineseNumber(note.saves)} 收藏</span>
         </div>
-        <h3>${note.title}</h3>
-        <p>${note.summary}</p>
-        <div class="tags">${note.tags.map((tag) => `<span>#${tag}</span>`).join("")}</div>
+        <h3 class="card-title">${note.title}</h3>
+        ${summary}
+        <div class="tags">${tags.map((tag) => `<span>#${tag}</span>`).join("")}</div>
         <div class="select-row">
-          <small>${note.hook}</small>
+          <small class="card-hook">${note.hook}</small>
           <button class="${isSelected ? "selected" : ""}" data-select="${note.id}" type="button">${isSelected ? "已选" : "选择"}</button>
         </div>
         ${note.sourceUrl ? `<a class="source-link" href="${note.sourceUrl}" target="_blank" rel="noreferrer">查看来源：${note.sourceLabel || "已登录小红书页面"}</a>` : ""}
