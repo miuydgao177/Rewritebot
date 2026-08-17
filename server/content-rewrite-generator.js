@@ -35,6 +35,14 @@ function validateRewriteOutputs(outputs) {
   if (!isUsefulArticle(outputs.article)) {
     throw new Error("模型返回内容过短或结构不完整，请重新生成。");
   }
+
+  if (!isUsefulVideo(outputs.video)) {
+    throw new Error("模型没有返回完整的视频脚本，请重新生成。");
+  }
+
+  if (!isUsefulBrief(outputs.brief)) {
+    throw new Error("模型没有返回完整的运营简报，请重新生成。");
+  }
 }
 
 function readCompletionContent(payload) {
@@ -59,7 +67,7 @@ async function requestModelCompletionWithModel(provider, model, notes, options) 
     body: JSON.stringify({
       model,
       temperature: 0.35,
-      max_tokens: 1200,
+      max_tokens: 2600,
       ...provider.extraBody,
       messages: [
         {
@@ -83,7 +91,7 @@ async function requestModelCompletionWithModel(provider, model, notes, options) 
 }
 
 function isRetryableModelError(error) {
-  return /provider returned error|rate limit|temporarily|overloaded|terminated|timeout|aborted|fetch failed|socket|network|unavailable for free|paid version|model.*unavailable|no endpoints|没有返回正文|内容过短|结构不完整|没有按要求返回|没有返回可用|分析过程/i.test(error.message || "");
+  return /provider returned error|rate limit|temporarily|overloaded|terminated|timeout|aborted|fetch failed|socket|network|unavailable for free|paid version|model.*unavailable|no endpoints|没有返回正文|内容过短|结构不完整|没有按要求返回|没有返回可用|没有返回完整|分析过程/i.test(error.message || "");
 }
 
 function normalizeModelError(error) {
@@ -126,9 +134,9 @@ function parseRewriteContent(content) {
     }
 
     return {
-      article: article ? polishArticleDraft(article) : "<p class=\"empty\">模型没有返回文章二创。</p>",
-      video: video || "<p class=\"empty\">模型没有返回视频脚本。</p>",
-      brief: brief || "<p class=\"empty\">模型没有返回运营简报。</p>",
+      article: article ? polishArticleDraft(ensureArticleHtml(article)) : "<p class=\"empty\">模型没有返回文章二创。</p>",
+      video: video ? ensureListHtml(video, "ol") : "<p class=\"empty\">模型没有返回视频脚本。</p>",
+      brief: brief ? ensureListHtml(brief, "ul") : "<p class=\"empty\">模型没有返回运营简报。</p>",
     };
   }
 
@@ -146,12 +154,12 @@ function isUsefulArticle(html) {
 
 function isUsefulVideo(html) {
   const text = stripHtml(String(html || ""));
-  return text.length >= 80 && /<ol[\s>]|<ul[\s>]/i.test(html);
+  return text.length >= 80 && (/<ol[\s>]|<ul[\s>]/i.test(html) || /分镜|画面|口播|字幕|互动|镜头|秒|开场|收口/.test(text));
 }
 
 function isUsefulBrief(html) {
   const text = stripHtml(String(html || ""));
-  return text.length >= 40 && /<ul[\s>]|<ol[\s>]/i.test(html);
+  return text.length >= 40 && (/<ul[\s>]|<ol[\s>]/i.test(html) || /素材共性|故事主线|文风|风险|发布建议|借用/.test(text));
 }
 
 function stripHtml(value) {
@@ -173,6 +181,48 @@ function normalizeRewriteOutputs(outputs) {
       ? outputs.brief
       : "<p class=\"empty\">模型没有返回可用的运营简报，请重新生成。</p>",
   };
+}
+
+function ensureArticleHtml(content) {
+  const value = String(content || "").trim();
+  if (/<h3[\s>]/i.test(value) && /<p[\s>]/i.test(value)) return value;
+
+  const lines = splitUsefulLines(value);
+  if (!lines.length) return value;
+
+  const [title, ...paragraphs] = lines;
+  return [
+    `<h3 class="draft-title">${escapeHtml(title.replace(/^标题[:：]\s*/, ""))}</h3>`,
+    ...paragraphs.map((line) => `<p>${escapeHtml(line)}</p>`),
+  ].join("\n");
+}
+
+function ensureListHtml(content, listTag) {
+  const value = String(content || "").trim();
+  if (/<ol[\s>]|<ul[\s>]/i.test(value)) return value;
+  if (/<[^>]+>/i.test(value)) return value;
+
+  const items = splitUsefulLines(value);
+  if (!items.length) return value;
+
+  const tag = listTag === "ol" ? "ol" : "ul";
+  return `<${tag}>${items.map((line) => `<li>${escapeHtml(line)}</li>`).join("")}</${tag}>`;
+}
+
+function splitUsefulLines(content) {
+  return String(content || "")
+    .split(/\n+/)
+    .map((line) => line.replace(/^\s*(?:[-*]|\d+[.、)]|[一二三四五六七八九十]+[、.])\s*/, "").trim())
+    .filter(Boolean);
+}
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function polishArticleDraft(article) {
